@@ -26,18 +26,16 @@ train_folder = "train2017"
 coco_dataset = CocoDetection(root=base_folder,
                              annFile=r"C:\Users\Final_Project\Documents\coco_archive\coco2017\annotations\instances_train2017.json")
 print(coco_dataset.root)
-print(f"מספר התמונות: {len(coco_dataset)}")
+print(f"num {len(coco_dataset)}")
 
 
-
-#יצירת מערכי נתונים ומעמיסי נתונים
 SIZE = 256
 class ColorizationDataset(Dataset):
     def __init__(self, paths, split='train'):
         if split == 'train':
             self.transforms = transforms.Compose([
                 transforms.Resize((SIZE, SIZE), Image.BICUBIC),
-                transforms.RandomHorizontalFlip(),  # A little data augmentation!
+                transforms.RandomHorizontalFlip(), 
             ])
         elif split == 'val':
             self.transforms = transforms.Resize((SIZE, SIZE), Image.BICUBIC)
@@ -74,11 +72,11 @@ class ColorizationDataset(Dataset):
         return len(self.paths)
 
 
-def make_dataloaders(batch_size=16, **kwargs):  # A handy function to make our dataloaders
+def make_dataloaders(batch_size=16, **kwargs): 
     dataset = ColorizationDataset(**kwargs)
     dataloader = DataLoader(dataset, batch_size=batch_size, num_workers=0,
                             pin_memory=True)
-    print("data_loader_נוצר_בהצלחה")
+    print("data_loader_create")
     return dataloader
 
 
@@ -94,8 +92,6 @@ print(len(train_dl), len(val_dl))
 torch.Size([16, 1, 256, 256])
 torch.Size([16, 2, 256, 256])
 
-
-#מחולל
 
 class UnetBlock(nn.Module):
     def __init__(self, nf, ni, submodule=None, input_c=None, dropout=False,
@@ -153,9 +149,6 @@ class Unet(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-
-#מאפיין
-
 class PatchDiscriminator(nn.Module):
     def __init__(self, input_c, num_filters=64, n_down=3):
         super().__init__()
@@ -180,8 +173,6 @@ class PatchDiscriminator(nn.Module):
         return self.model(x)
 
 
-#פונקציית מחיר
-
 class GANLoss(nn.Module):
     def __init__(self, gan_mode='vanilla', real_label=1.0, fake_label=0.0):
         super().__init__()
@@ -203,8 +194,7 @@ class GANLoss(nn.Module):
         labels = self.get_labels(preds, target_is_real)
         loss = self.loss(preds, labels)
         return loss
-
-#פונקציות עזר מגיפיטי
+#help function
 def weights_init_normal(m):
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
@@ -215,7 +205,7 @@ def weights_init_normal(m):
 
 def init_model(model, device):
     model.to(device)
-    model.apply(weights_init_normal)  # You may define a weights initialization function
+    model.apply(weights_init_normal)  #  may define a weights initialization function
     return model
 
 import torch
@@ -251,7 +241,7 @@ def visualize(model, data, save=False):
         model.forward()
         # Visualize the model's output here
 
-#לחבר הכל ביחד
+#collect all
 
 class MainModel(nn.Module):
     def __init__(self, net_G=None, lr_G=2e-4, lr_D=2e-4,
@@ -317,7 +307,7 @@ class MainModel(nn.Module):
 
 model = MainModel()
 
-#פונקציית אימון
+#train function
 
 
 def train_model(model, train_dl, epochs, display_every=200):
